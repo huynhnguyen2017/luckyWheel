@@ -2,38 +2,40 @@ import React, { useState } from "react";
 import Swal from 'sweetalert2';
 
 // Firebase App (the core Firebase SDK) is always required and must be listed first
-import firebase from "firebase";
+// import firebase from "firebase";
 
 // If you enabled Analytics in your project, add the Firebase SDK for Analytics
-import "firebase/analytics";
+// import "firebase/analytics";
 
 // Add the Firebase products that you want to use
-import "firebase/auth";
-import "firebase/firestore";
+// import "firebase/auth";
+// import "firebase/firestore";
+
+import { firebase, database } from '../utils/firebase';
 
 import loginImg from '../../images/school.jpeg';
 
 export function Login({getUser}) {
     // TODO: Replace the following with your app's Firebase project configuration
   // For Firebase JavaScript SDK v7.20.0 and later, `measurementId` is an optional field
-  const firebaseConfig = {
-    apiKey: "AIzaSyAUK7wbDlwVJBuIsXFdxiNW3q3a8rcaZNY",
-    authDomain: "luckywheel-e0bd7.firebaseapp.com",
-    databaseURL: "https://luckywheel-e0bd7.firebaseio.com",
-    projectId: "luckywheel-e0bd7",
-    storageBucket: "luckywheel-e0bd7.appspot.com",
-    messagingSenderId: "686055839926",
-    appId: "1:686055839926:web:dee3d238eaf61373026e17",
-    measurementId: "G-47P5LMELNX"
-  };
+  // const firebaseConfig = {
+  //   apiKey: "AIzaSyAUK7wbDlwVJBuIsXFdxiNW3q3a8rcaZNY",
+  //   authDomain: "luckywheel-e0bd7.firebaseapp.com",
+  //   databaseURL: "https://luckywheel-e0bd7.firebaseio.com",
+  //   projectId: "luckywheel-e0bd7",
+  //   storageBucket: "luckywheel-e0bd7.appspot.com",
+  //   messagingSenderId: "686055839926",
+  //   appId: "1:686055839926:web:dee3d238eaf61373026e17",
+  //   measurementId: "G-47P5LMELNX"
+  // };
 
-  // Initialize Firebase
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+  // // Initialize Firebase
+  // if (!firebase.apps.length) {
+  //   firebase.initializeApp(firebaseConfig);
 
-    firebase.analytics();
-  }
-  const database = firebase.database();
+  //   firebase.analytics();
+  // }
+  // const database = Firebase.database();
   const [userInfo, setUserInfo] = useState('');
 
   const callLogout = () => {
@@ -66,8 +68,10 @@ export function Login({getUser}) {
       database.ref('/users/' + userId).set({
         username: displayName,
         email: email,
-        phone: phoneNumber
+        phone: phoneNumber        
       });
+      console.log('user: ');
+      console.log(user);
     }).catch(function(error) {
       // Handle Errors here.
       // const errorCode = error.code;

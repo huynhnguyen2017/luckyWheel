@@ -10,6 +10,7 @@ export function Administrator() {
           <img src={loginImg} />
         </div>
       </div>
+      
       <div className="footer">
         <button type="button" className="btn">Đăng nhập</button>
       </div>
