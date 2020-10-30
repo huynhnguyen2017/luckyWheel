@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 
-import { firebase, firestore, storage } from '../utils/firebase';
+import { firebase, firestore, storage, database } from '../utils/firebase';
 import "./input.css";
 
 export function Input({setInputObject}) {
@@ -17,21 +17,24 @@ export function Input({setInputObject}) {
   const [prizeNumber, setPrizeNumber] = useState(0);
   const [prizeNumberSta, setPrizeNumberSta] = useState([])
 
-  useEffect(() => {
-    firestore.collection("prizeInput").get().then((querySnapshot) => {
-      // console.log('check firestore: ');
+  const callFirebase = () => {
+    database.ref("prizeInput").once('value').then(function(snapshot) {
       setImageAsUrl([]);
       setPrizeNumberSta([]);
-      querySnapshot.forEach((doc) => {
-        // console.log(`${doc.id} => ${doc.data().prizeImage.split('?')[0].split('/')[7]}`);
-        setImageAsUrl(prevObject => ([...prevObject, doc.data().prizeImage]));
-        setPrizeNumberSta(prevObject => ([...prevObject, doc.data().number]));
-        // setInputObject(imageAsUrl);
+      
+      snapshot.forEach(function(childSnapshot) {
+        // var childKey = childSnapshot.key;
+        var childData = childSnapshot.val();
+        setImageAsUrl(prevObject => ([...prevObject, childData.prizeImage]));
+        setPrizeNumberSta(prevObject => ([...prevObject, childData.number]));
+        // print key and value
+        // console.log(childData.prizeImage);
       });
     });
-  }, []);
+  };
 
-  
+  useEffect(() => callFirebase(), []);
+
   setInputObject(prizeNumberSta, imageAsUrl);
   // console.log('link: ');
   // console.log(imageAsUrl);
@@ -70,20 +73,14 @@ export function Input({setInputObject}) {
         // setImageAsUrl(prevObject => ({...prevObject, imgUrl: fireBaseUrl, number: prizeNumber}));
         // console.log(imageAsUrl);
         setCounter(0);
-        
-        // save to firestore
-        firestore.collection("prizeInput").add({
+
+        // save to firebase realtime
+        database.ref("/prizeInput/image" + prizeNumberSta.length).set({
           prizeImage: fireBaseUrl,
           number: prizeNumber
-        })
-        .then(function(docRef) {
-          setImageAsUrl(prevObject => ([...prevObject, fireBaseUrl]));
-          setPrizeNumberSta(prevObject => ([...prevObject, prizeNumber]));
-          setInputObject(imageAsUrl);
-        })
-        .catch(function(error) {
-          console.error("Error adding document: ", error);
         });
+        callFirebase();
+        
       });
     });
   }
@@ -134,12 +131,12 @@ export function Input({setInputObject}) {
         }}
       >
         {/* Get database firebase ???????????? */}
-        {prizeNumberSta && prizeNumberSta.map((value, num) => (<div className="d-flex align-items-center">
+        {imageAsUrl && imageAsUrl.map((image, num) => (<div className="d-flex align-items-center">
         <span>
           <input type="file" name="file1" id="file1" className="inputfile" onChange={handleImageAsFile}/>
-          <label htmlFor="file1">Choose image</label>
+          <label htmlFor="file1">Chọn hình</label>
         </span>     
-        <img src={imageAsUrl[num]} alt="image tag" style={{margin: '5px 10px 5px 10px'}} height="50px" width="50px" />
+        <img src={image} alt="image tag" style={{margin: '5px 10px 5px 10px'}} height="50px" width="50px" />
         <input type="text" name="number1" className="inputNum" onChange={(e) => setPrizeNumber(e.target.value)} value={`${prizeNumberSta[num]}`}/>
         
         </div>))}
@@ -147,16 +144,16 @@ export function Input({setInputObject}) {
         <div className="d-flex align-items-center">
           <span style={{marginRight: 70}}>
             <input type="file" name="file1" id="file1" className="inputfile" onChange={handleImageAsFile}/>
-            <label htmlFor="file1">Choose image</label>
+            <label htmlFor="file1">Chọn hình</label>
           </span>     
-          <input type="text" name="number1" className="inputNum" onChange={(e) => setPrizeNumber(e.target.value)} value={`${prizeNumberSta[num]}`}/>
+          <input type="text" name="number1" className="inputNum" onChange={(e) => setPrizeNumber(e.target.value)} />
         
         </div>))}
         
         {/* {imageAsUrl && imageAsUrl.map(image => console.log(image))} */}
-        <button type="button" className="btnPlus btn" style={{fontSize: "15px"}} onClick={() => setCounter(counter+1)}>Thêm</button>
-        {/* <button type="button" className="btnPlus btn" style={{fontSize: "15px", marginLeft: 3}} onClick={() => setCounter(0)}>Đặt lại</button> */}
-        <button className="btn btn" style={{fontSize: "15px", marginLeft: 3}} onClick={handleFireBaseUpload}>Xong</button>
+        <button type="button" className="btnPlus btn" style={{fontSize: "15px"}} onClick={() => setCounter(counter+1)}>Thêm ảnh</button>
+        <button type="button" className="btnPlus btn" style={{fontSize: "15px", marginLeft: 3}} onClick={() => setCounter(0)}>Đặt lại</button>
+        <button className="btn btn" style={{fontSize: "15px", marginLeft: 3}} onClick={handleFireBaseUpload}>Lưu</button>
       </div>
     </div>
   </div>

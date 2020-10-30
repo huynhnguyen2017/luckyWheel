@@ -16,36 +16,11 @@ import { firebase, database, firestore } from '../utils/firebase';
 import loginImg from '../../images/school.jpeg';
 
 export function Login({getUser, setLoginStatus}) {
-    // TODO: Replace the following with your app's Firebase project configuration
-  // For Firebase JavaScript SDK v7.20.0 and later, `measurementId` is an optional field
-  // const firebaseConfig = {
-  //   apiKey: "AIzaSyAUK7wbDlwVJBuIsXFdxiNW3q3a8rcaZNY",
-  //   authDomain: "luckywheel-e0bd7.firebaseapp.com",
-  //   databaseURL: "https://luckywheel-e0bd7.firebaseio.com",
-  //   projectId: "luckywheel-e0bd7",
-  //   storageBucket: "luckywheel-e0bd7.appspot.com",
-  //   messagingSenderId: "686055839926",
-  //   appId: "1:686055839926:web:dee3d238eaf61373026e17",
-  //   measurementId: "G-47P5LMELNX"
-  // };
-
-  // // Initialize Firebase
-  // if (!firebase.apps.length) {
-  //   firebase.initializeApp(firebaseConfig);
-
-  //   firebase.analytics();
-  // }
-  // const database = Firebase.database();
   const [userInfo, setUserInfo] = useState('');
 
   const callLogout = () => {
     firebase.auth().signOut().then(function() {
-      Swal.fire({
-        icon: 'success',
-        title: 'Logout suceeds',
-        showConfirmButton: false,
-        timer: 2000,
-      });
+      // log out successfully
     }).catch(function(error) {
       // An error happened.
     });
@@ -82,17 +57,6 @@ export function Login({getUser, setLoginStatus}) {
         console.error("Error writing document: ", error);
       });
       
-      // database.ref('/users/' + userId).set({
-      //   username: displayName,
-      //   email: email,
-      //   phone: phoneNumber,
-      //   url: photoURL,
-      //   provider: providerId,
-      //   prizes: {
-      //     image: '',
-      //     number: 0
-      //   }
-      // });
       setLoginStatus();
       // console.log('user: ');
       // console.log(user);

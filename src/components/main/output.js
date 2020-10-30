@@ -1,14 +1,12 @@
-import React from "react";
-import Alert from 'react-bootstrap/Alert';
-import { database } from '../utils/firebase';
+import React, { useEffect, useState } from "react";
+// import Alert from 'react-bootstrap/Alert';
+import Image from 'react-bootstrap/Image'
+import { firebase, database } from '../utils/firebase';
 
 function PrizeList({ userId, result }) {   // { value, onChange }
-  // const handleChange = (field) => (e) => {
-  //   onChange({
-  //     ...value,
-  //     [field]: e.target.value,
-  //   });
-  // };
+  const [prizes, setPrizes] = useState([]);
+  const [numbers, setNumbers] = useState([]);
+
   const colors = [
     'primary',
     'secondary',
@@ -20,22 +18,21 @@ function PrizeList({ userId, result }) {   // { value, onChange }
     'dark',
   ];
 
-  database.ref('/users/' + userId).once('value').then(function(snapshot) {
-    const fields = snapshot.val();
-    if (fields && !snapshot.val().prizes) {
-      database.ref('/users/' + userId).set({
-        ...fields,
-        prizes: {
-          image: result,
-          number: 1
-        }
+  // get current user
+  const user = firebase.auth().currentUser;
+  useEffect(() => {
+    database.ref("/users/" + user.providerData[0].uid).once('value').then(function(snapshot) {
+      setPrizes([]);
+      setNumbers([]);
+      snapshot.forEach((childSnapshot) => {
+        var childData = childSnapshot.val();
+        setPrizes(prevObject => ([...prevObject, childData.image]));
+        setNumbers(prevObject => ([...prevObject, childData.number]));
       });
-    }
+    });
+  }, []);
 
     // check and append prizes
-    
-
-  });
 
   return (
     <div>
@@ -45,11 +42,16 @@ function PrizeList({ userId, result }) {   // { value, onChange }
       <p style={{ margin: "6px 0px" }}>
         <small>Tên giải thưởng</small>
       </p>
-      {colors.map((variant, idx) => (
-        <Alert key={idx} variant={variant}>
-          Quạt máy Swis
-        </Alert>
-      ))}
+      {(prizes && prizes.map((prize, num) => {
+          const randNum = Math.floor(Math.random() * colors.lenth);
+          return (
+            <div>
+              <img src={prize} alt="image tag" style={{margin: '5px 10px 5px 10px'}} height="50px" width="50px" />
+              <span style={{marginLeft: 10, border: "2px solid red"}}>{numbers[num]}</span>
+            </div>
+          );
+        }))
+      }
     </div>
   );
 }

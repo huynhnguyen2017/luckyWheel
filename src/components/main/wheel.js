@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Img from '../../images/school.jpeg';
+import { firebase, database } from '../utils/firebase';
 
-export function Wheel({prizeNumberList, imageAsUrlList, setPrizeIndex, open}) {
+export function Wheel({prizeNumberList, imageAsUrlList, setPrizeIndex, open, close}) {
 
   const { length } = prizeNumberList;
 
@@ -24,13 +25,44 @@ export function Wheel({prizeNumberList, imageAsUrlList, setPrizeIndex, open}) {
   useEffect(() => {
     setTheta(360/length);
     setRadius(Math.round( ( offsetHeight / 2) / Math.tan( Math.PI / length )));
-  }, [length, theta]);
+    
+  }, [length, theta, offsetHeight]);
+
+  // get current user
+  const user = firebase.auth().currentUser;
+
+  const [prizeCurrentNum, setPrizeCurrentNum] = useState(0);
 
   function rotateCarousel() {
+    close();
     const currentAngle = (Math.abs(angle) + theta * selectedIndex + 360 * 2) * (-1);
     // identify the mod of list of images ?????????
     const testIndex = (Math.abs(angle / theta) + selectedIndex) % length;
-    console.log(`index: ${testIndex}`);
+    
+    const image_ = imageAsUrlList[testIndex] || [];
+    const image_first = image_.split("?")[0].split('/');
+    const image_second = image_first[image_first.length - 1].split('.')[0];
+
+    // check database
+    database.ref("/users/" + user.providerData[0].uid + "/" + image_second).once('value').then(function(snapshot) {
+      if (snapshot && snapshot.val()) {
+        const currentNum = snapshot.val().number;
+        // save  prize to firebase
+        database.ref("/users/" + user.providerData[0].uid + "/" + image_second).set({
+          image: imageAsUrlList[testIndex],
+          number: currentNum + 1
+        });
+      }
+      else {
+        database.ref("/users/" + user.providerData[0].uid + "/" + image_second).set({
+          image: imageAsUrlList[testIndex],
+          number: 1
+        });
+      }
+    });
+
+    
+
     setPrizeIndex(testIndex);
     setAngle(currentAngle);
     // console.log(angle);
@@ -66,7 +98,7 @@ export function Wheel({prizeNumberList, imageAsUrlList, setPrizeIndex, open}) {
                   rotateCarousel();
                   setTimeout(
                     () => open(), 
-                    10000
+                    7000
                   );
                             
                 }}>Start</button>

@@ -41,7 +41,7 @@ function App() {
 
   const prizeIndex = (value) => {
     setPrizeResult(value);
-    console.log(`prize result: ${prizeResult}`);
+    // console.log(`prize result: ${prizeResult}`);
   }
 
   // popup show
@@ -55,7 +55,7 @@ function App() {
     setShow(true);
   }
 
-  var user = firebase.auth().currentUser;
+  const user = firebase.auth().currentUser;
 
   const [isNotLogged, setIsNotLogged] = useState(true);
 
@@ -79,7 +79,7 @@ function App() {
         <div className="d-flex">
           <Input setInputObject={receiveChildValue}/>
           <div style={{minWidth: 600}}>
-          <Wheel prizeNumberList={prizeNumberList} imageAsUrlList={imageAsUrlList} setPrizeIndex={prizeIndex} showResult={show} open={openShow}/>
+          <Wheel prizeNumberList={prizeNumberList} imageAsUrlList={imageAsUrlList} setPrizeIndex={prizeIndex} showResult={show} open={openShow} close={closeShow}/>
           </div>          
           {show && 
             <PrizeResult getPrizeIndex={prizeResult} hidden={closeShow} showResult={show} imageAsUrlList={imageAsUrlList}/>}
