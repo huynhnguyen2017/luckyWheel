@@ -1,5 +1,5 @@
 import React from "react";
-// import "./resultAlert.css";
+import "./resultAlert.css";
 
 function ResultAlert({getPrizeIndex, showResult, hidden, imageAsUrlList}) {
   // const imageIndex = settings.imageKeys.indexOf(id);

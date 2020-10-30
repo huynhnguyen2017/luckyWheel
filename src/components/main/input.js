@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Button from 'react-bootstrap/Button'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
@@ -27,15 +28,19 @@ export function Input({setInputObject}) {
         var childData = childSnapshot.val();
         setImageAsUrl(prevObject => ([...prevObject, childData.prizeImage]));
         setPrizeNumberSta(prevObject => ([...prevObject, childData.number]));
+        setInputObject(prizeNumberSta, imageAsUrl);
         // print key and value
         // console.log(childData.prizeImage);
       });
     });
   };
 
-  useEffect(() => callFirebase(), []);
+  useEffect(() => {
+    callFirebase();
+  }, []);
 
   setInputObject(prizeNumberSta, imageAsUrl);
+
   // console.log('link: ');
   // console.log(imageAsUrl);
   // console.log(prizeNumberSta);
@@ -45,6 +50,14 @@ export function Input({setInputObject}) {
     setImageAsFile(imageFile => (image))
   }
 
+  // get name of file
+  const getFile = (baseUrl) => {
+    const image_first = baseUrl.split("?")[0].split('/');
+    const image_second = image_first[image_first.length - 1].split('.')[0];
+    return image_second;
+  }
+
+  // handle uploading images
   const handleFireBaseUpload = e => {
     e.preventDefault()
     console.log('start of upload')
@@ -75,7 +88,15 @@ export function Input({setInputObject}) {
         setCounter(0);
 
         // save to firebase realtime
-        database.ref("/prizeInput/image" + prizeNumberSta.length).set({
+        // const image_ = imageAsUrlList[testIndex] || [];
+    
+    
+        // if (image_.length > 0) {
+
+        // const image_first = fireBaseUrl.split("?")[0].split('/');
+        // const image_second = image_first[image_first.length - 1].split('.')[0];
+
+        database.ref("/prizeInput/" + getFile(fireBaseUrl)).set({
           prizeImage: fireBaseUrl,
           number: prizeNumber
         });
@@ -84,6 +105,23 @@ export function Input({setInputObject}) {
       });
     });
   }
+
+  // preview images before uploading...
+  const [imgData, setImgData] = useState(null);
+
+  const onChangePicture = e => {
+    e.preventDefault();
+    if (e.target.files[0]) {
+      // console.log("picture: ", e.target.files);
+      // setPicture(e.target.files[0]);
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        setImgData(reader.result);
+      });
+      reader.readAsDataURL(e.target.files[0]);
+      handleImageAsFile(e);
+    }
+  };
 
   return (
     <div
@@ -131,29 +169,43 @@ export function Input({setInputObject}) {
         }}
       >
         {/* Get database firebase ???????????? */}
-        {imageAsUrl && imageAsUrl.map((image, num) => (<div className="d-flex align-items-center">
-        <span>
-          <input type="file" name="file1" id="file1" className="inputfile" onChange={handleImageAsFile}/>
-          <label htmlFor="file1">Chọn hình</label>
-        </span>     
-        <img src={image} alt="image tag" style={{margin: '5px 10px 5px 10px'}} height="50px" width="50px" />
-        <input type="text" name="number1" className="inputNum" onChange={(e) => setPrizeNumber(e.target.value)} value={`${prizeNumberSta[num]}`}/>
-        
-        </div>))}
+        {imageAsUrl &&
+          imageAsUrl.map((image, num) => (<div className="d-flex align-items-center">
+          <Button variant="danger" onClick={() => {
+            database.ref("prizeInput").once('value').then(function(snapshot) {
+              
+              snapshot.forEach(function(childSnapshot) {
+                const prize_image = getFile(childSnapshot.val().prizeImage);
+                if (prize_image === getFile(image)) {
+                  database.ref("/prizeInput/" + prize_image).remove();
+                  callFirebase();
+                }
+              });
+            });
+            // database.ref("/prizeInput/image" + prizeNumberSta[num]).remove()
+            // console.log("/prizeInput/image" + prizeNumberSta[num]);
+            callFirebase();
+          }}>Xóa</Button>    
+          <img src={image} alt="image tag" style={{margin: '5px 10px 5px 10px'}} height="50px" width="50px" />
+          <input type="text" name="number1" className="inputNum" onChange={(e) => setPrizeNumber(e.target.value)} value={`${prizeNumberSta[num]}`}/>
+          
+          </div>))
+        }
         {[...Array(counter).keys()].map(num => (
         <div className="d-flex align-items-center">
           <span style={{marginRight: 70}}>
-            <input type="file" name="file1" id="file1" className="inputfile" onChange={handleImageAsFile}/>
+            <input type="file" name="file1" id="file1" className="inputfile" onChange={onChangePicture} />  {/* onChange={handleImageAsFile}*/}
             <label htmlFor="file1">Chọn hình</label>
-          </span>     
+          </span>
+          <img src={imgData} alt="image tag" style={{margin: '5px 10px 5px 10px'}} height="50px" width="50px" />   
           <input type="text" name="number1" className="inputNum" onChange={(e) => setPrizeNumber(e.target.value)} />
         
         </div>))}
         
         {/* {imageAsUrl && imageAsUrl.map(image => console.log(image))} */}
-        <button type="button" className="btnPlus btn" style={{fontSize: "15px"}} onClick={() => setCounter(counter+1)}>Thêm ảnh</button>
-        <button type="button" className="btnPlus btn" style={{fontSize: "15px", marginLeft: 3}} onClick={() => setCounter(0)}>Đặt lại</button>
-        <button className="btn btn" style={{fontSize: "15px", marginLeft: 3}} onClick={handleFireBaseUpload}>Lưu</button>
+        <button type="button" className="btnPlus btn inputBtn" style={{fontSize: "15px"}} onClick={() => setCounter(counter+1)}>Thêm ảnh</button>
+        <button type="button" className="btnPlus btn inputBtn" style={{fontSize: "15px", marginLeft: 3}} onClick={() => setCounter(0)}>Đặt lại</button>
+        <button className="btn inputBtn" style={{fontSize: "15px", marginLeft: 3}} onClick={handleFireBaseUpload}>Lưu</button>
       </div>
     </div>
   </div>

@@ -4,7 +4,7 @@ import { firebase, database } from '../utils/firebase';
 
 export function Wheel({prizeNumberList, imageAsUrlList, setPrizeIndex, open, close}) {
 
-  const { length } = prizeNumberList;
+  const length = prizeNumberList.length;
 
   const [cellCount, setCellCount] = useState(15); // cellCount set from cells-range input value
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -40,26 +40,32 @@ export function Wheel({prizeNumberList, imageAsUrlList, setPrizeIndex, open, clo
     const testIndex = (Math.abs(angle / theta) + selectedIndex) % length;
     
     const image_ = imageAsUrlList[testIndex] || [];
-    const image_first = image_.split("?")[0].split('/');
-    const image_second = image_first[image_first.length - 1].split('.')[0];
+    
+    
+    if (image_.length > 0) {
 
-    // check database
-    database.ref("/users/" + user.providerData[0].uid + "/" + image_second).once('value').then(function(snapshot) {
-      if (snapshot && snapshot.val()) {
-        const currentNum = snapshot.val().number;
-        // save  prize to firebase
-        database.ref("/users/" + user.providerData[0].uid + "/" + image_second).set({
-          image: imageAsUrlList[testIndex],
-          number: currentNum + 1
-        });
-      }
-      else {
-        database.ref("/users/" + user.providerData[0].uid + "/" + image_second).set({
-          image: imageAsUrlList[testIndex],
-          number: 1
-        });
-      }
-    });
+      const image_first = image_.length > 0 && image_.split("?")[0].split('/');
+      const image_second = image_first.length > 0 && image_first[image_first.length - 1].split('.')[0];
+
+      // check database
+      database.ref("/users/" + user.providerData[0].uid + "/" + image_second).once('value').then(function(snapshot) {
+        if (snapshot && snapshot.val()) {
+          const currentNum = snapshot.val().number;
+          // save  prize to firebase
+          database.ref("/users/" + user.providerData[0].uid + "/" + image_second).set({
+            image: imageAsUrlList[testIndex],
+            number: currentNum + 1
+          });
+        }
+        else {
+          database.ref("/users/" + user.providerData[0].uid + "/" + image_second).set({
+            image: imageAsUrlList[testIndex],
+            number: 1
+          });
+        }
+      });
+    }
+    
 
     
 
@@ -75,7 +81,7 @@ export function Wheel({prizeNumberList, imageAsUrlList, setPrizeIndex, open, clo
   }
   
   
-  if (length > 3) {
+  {
     return (
       <>
       { 

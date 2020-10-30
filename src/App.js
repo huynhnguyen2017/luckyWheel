@@ -74,19 +74,20 @@ function App() {
    
   return (
     <>    
-      {(user || !isNotLogged) && (<>
+      {(!isNotLogged) && (<>
         <div className="d-flex justify-content-end"><button type="button" className="btn" onClick={() => callLogout()}>Đăng xuất</button></div>
         <div className="d-flex">
           <Input setInputObject={receiveChildValue}/>
           <div style={{minWidth: 600}}>
-          <Wheel prizeNumberList={prizeNumberList} imageAsUrlList={imageAsUrlList} setPrizeIndex={prizeIndex} showResult={show} open={openShow} close={closeShow}/>
+            <Wheel prizeNumberList={prizeNumberList} imageAsUrlList={imageAsUrlList} setPrizeIndex={prizeIndex} showResult={show} open={openShow} close={closeShow}/>
           </div>          
-          {show && 
-            <PrizeResult getPrizeIndex={prizeResult} hidden={closeShow} showResult={show} imageAsUrlList={imageAsUrlList}/>}
+          
           <Output result={imageAsUrlList[prizeResult]} userId={user.providerData[0].uid}/>
           
         </div></>
       )}
+      {show && 
+            <PrizeResult getPrizeIndex={prizeResult} hidden={closeShow} showResult={show} imageAsUrlList={imageAsUrlList}/>}
       {(isNotLogged) && (
         <div className="App">
           <div className="login">
