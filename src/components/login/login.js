@@ -11,11 +11,11 @@ import Swal from 'sweetalert2';
 // import "firebase/auth";
 // import "firebase/firestore";
 
-import { firebase, database } from '../utils/firebase';
+import { firebase, database, firestore } from '../utils/firebase';
 
 import loginImg from '../../images/school.jpeg';
 
-export function Login({getUser}) {
+export function Login({getUser, setLoginStatus}) {
     // TODO: Replace the following with your app's Firebase project configuration
   // For Firebase JavaScript SDK v7.20.0 and later, `measurementId` is an optional field
   // const firebaseConfig = {
@@ -59,19 +59,43 @@ export function Login({getUser}) {
       // The signed-in user info.
       const user = result.user;
       // ...
-      
-      const phoneNumber = user.phoneNumber || '';
-      const displayName = user.displayName || '';
-      const email = user.email || '';
-      const userId = user.uid;
-      
-      database.ref('/users/' + userId).set({
+      const data = user.providerData[0];
+      const phoneNumber = data.phoneNumber || '';
+      const displayName = data.displayName || '';
+      const email = data.email || '';
+      const userId = data.uid;
+      const photoURL = data.photoURL;
+      const providerId = data.providerId;
+
+      // Add a new document in collection "cities"
+      firestore.collection("users").doc(userId).set({
         username: displayName,
         email: email,
-        phone: phoneNumber        
+        phone: phoneNumber,
+        url: photoURL,
+        provider: providerId,
+      })
+      .then(function() {
+        console.log("Document successfully written!");
+      })
+      .catch(function(error) {
+        console.error("Error writing document: ", error);
       });
-      console.log('user: ');
-      console.log(user);
+      
+      // database.ref('/users/' + userId).set({
+      //   username: displayName,
+      //   email: email,
+      //   phone: phoneNumber,
+      //   url: photoURL,
+      //   provider: providerId,
+      //   prizes: {
+      //     image: '',
+      //     number: 0
+      //   }
+      // });
+      setLoginStatus();
+      // console.log('user: ');
+      // console.log(user);
     }).catch(function(error) {
       // Handle Errors here.
       // const errorCode = error.code;
@@ -90,6 +114,17 @@ export function Login({getUser}) {
       });
     });
   }
+
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+      // User is signed in.
+      setLoginStatus();
+    } else {
+      // No user is signed in.
+    }
+  });
+  
+
   return (
     <div className="base-container">
       <div className='header'>Đăng nhập</div>
@@ -101,7 +136,7 @@ export function Login({getUser}) {
       </div>
       <div className="footer">
         <button type="button" className="btn" onClick={() => callFacebook()}>Đăng nhập</button>
-        <button type="button" className="btn" onClick={() => callLogout()}>Đăng xuất</button>
+        
       </div>
 
     </div> );

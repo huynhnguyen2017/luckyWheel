@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Swal from 'sweetalert2';
 
 import "./App.scss";
 import { Login, Administrator } from "./components/login/index";
 import { Input } from "./components/main/index";
 import { Wheel } from "./components/main/index";
 import PrizeResult from './components/main/result';
+import Output from './components/main/output';
+import { firebase } from './components/utils/firebase';
 
 function App() { 
 
@@ -51,31 +54,60 @@ function App() {
   const openShow = () => {
     setShow(true);
   }
+
+  var user = firebase.auth().currentUser;
+
+  const [isNotLogged, setIsNotLogged] = useState(true);
+
+
+  const getLoginStatus = () => {
+    setIsNotLogged(false);
+  }
+
+  const callLogout = () => {
+    firebase.auth().signOut().then(function() {
+      setIsNotLogged(true);
+    }).catch(function(error) {
+      // An error happened.
+    });
+  }
    
   return (
-    <div className="d-flex">
-      <Input setInputObject={receiveChildValue}/>
-      <Wheel prizeNumberList={prizeNumberList} imageAsUrlList={imageAsUrlList} setPrizeIndex={prizeIndex} showResult={show} open={openShow}/>
-      {show && 
-        <PrizeResult getPrizeIndex={prizeResult} hidden={closeShow} showResult={show} imageAsUrlList={imageAsUrlList}/>}
-      {/* <div className="App">
-      <div className="login">
-        <div className="container">
-          {isLogginActive && (
-            <Login/>
-          )}
-          {!isLogginActive && (
-            <Administrator />
-          )}
+    <>    
+      {(user || !isNotLogged) && (<>
+        <div className="d-flex justify-content-end"><button type="button" className="btn" onClick={() => callLogout()}>Đăng xuất</button></div>
+        <div className="d-flex">
+          <Input setInputObject={receiveChildValue}/>
+          <div style={{minWidth: 600}}>
+          <Wheel prizeNumberList={prizeNumberList} imageAsUrlList={imageAsUrlList} setPrizeIndex={prizeIndex} showResult={show} open={openShow}/>
+          </div>          
+          {show && 
+            <PrizeResult getPrizeIndex={prizeResult} hidden={closeShow} showResult={show} imageAsUrlList={imageAsUrlList}/>}
+          <Output result={imageAsUrlList[prizeResult]} userId={user.providerData[0].uid}/>
+          
+        </div></>
+      )}
+      {(isNotLogged) && (
+        <div className="App">
+          <div className="login">
+            <div className="container">
+              {isLogginActive && (
+                <Login setLoginStatus={getLoginStatus}/>
+              )}
+              {!isLogginActive && (
+                <Administrator />
+              )}
+            </div>
+            <RightSide
+              current={current}
+              currentActive={currentActive}
+              clicked={changeState}
+            />
+          </div>
         </div>
-        <RightSide
-          current={current}
-          currentActive={currentActive}
-          clicked={changeState}
-        />
-      </div>
-    </div> */}
-    </div>    
+      )}
+      
+    </>    
   );
 }
 

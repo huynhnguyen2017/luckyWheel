@@ -48,7 +48,7 @@ export function Wheel({prizeNumberList, imageAsUrlList, setPrizeIndex, open}) {
       <>
       { 
         imageAsUrlList && (
-          <>
+          <div>
             <div className="scene">
               <div className="carousel" ref={carouselDiv} style={{transform: `translateZ(${-radius}px) rotateX(${angle}deg)`, transitionDuration: '6s'}}>
                 {imageAsUrlList.map((image, num) => {
@@ -60,15 +60,19 @@ export function Wheel({prizeNumberList, imageAsUrlList, setPrizeIndex, open}) {
   
             <div className="carousel-options">
               <p>
-                <button className="next-button btn btn-primary" onClick={() => {
+                <button className="btn btn-primary" onClick={() => {
                   const random_number = Math.floor(Math.random() * length);
                   setSelectedIndex(selectedIndex + random_number);
                   rotateCarousel();
-                  open();          
+                  setTimeout(
+                    () => open(), 
+                    10000
+                  );
+                            
                 }}>Start</button>
               </p>
             </div>
-          </>
+          </div>
         )
       }
       </>
